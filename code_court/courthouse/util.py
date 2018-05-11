@@ -1,6 +1,7 @@
 import datetime
 
 from functools import wraps
+from typing import Optional
 
 import bcrypt
 
@@ -15,6 +16,7 @@ import json
 from database import db_session
 
 
+from typing import Callable
 RUN_CACHE_NAME = 'runcache'
 SCORE_CACHE_NAME = 'scorecache'
 
@@ -56,7 +58,7 @@ def is_password_matching(plaintext_password, hashed_password):
         hashed_password.encode()).decode("UTF-8") == hashed_password
 
 
-def login_required(role="ANY"):
+def login_required(role: str = "ANY") -> Callable:
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
@@ -74,7 +76,7 @@ def login_required(role="ANY"):
     return wrapper
 
 
-def checkbox_result_to_bool(res):
+def checkbox_result_to_bool(res: str) -> Optional[bool]:
     """
     Takes in a checkbox result from a form and converts it to a bool
 
@@ -91,13 +93,13 @@ def checkbox_result_to_bool(res):
     return None
 
 
-def jwt_identity(payload):
+def jwt_identity(payload: dict):
     user_id = payload['identity']
 
     return model.User.query.filter_by(id=user_id).first()
 
 
-def set_configuration(key, val):
+def set_configuration(key: str, val: str):
     config = model.Configuration.query.filter_by(key=key).scalar()
     if not config:
         raise Exception("Can't find configuration for key {}".format(key))
@@ -105,11 +107,11 @@ def set_configuration(key, val):
     db_session.commit()
 
 
-def get_configuration(key):
+def get_configuration(key: str) -> int:
     return model.Configuration.query.filter_by(key=key).scalar().convertedVal
 
 
-def ssl_required(fn):
+def ssl_required(fn: Callable) -> Callable:
     @wraps(fn)
     def decorated_view(*args, **kwargs):
         if current_app.config.get("SSL"):
@@ -123,7 +125,7 @@ def ssl_required(fn):
     return decorated_view
 
 
-def i(num):
+def i(num: str) -> Optional[int]:
     try:
         return int(num)
     except Exception:
@@ -135,7 +137,7 @@ def paginate(sa_query, page, per_page=20, error_out=True):
     return sa_query.paginate(page, per_page, error_out)
 
 
-def invalidate_cache_item(cache_name, key):
+def invalidate_cache_item(cache_name: str, key: str):
     """Deletes a specific item in the specified cache"""
     try:
         import uwsgi
@@ -144,7 +146,7 @@ def invalidate_cache_item(cache_name, key):
         pass
 
 
-def invalidate_cache(cache_name):
+def invalidate_cache(cache_name: str):
     """Deletes everything in the specificed cache"""
     try:
         import uwsgi
@@ -153,45 +155,46 @@ def invalidate_cache(cache_name):
         pass
 
 
-def str_to_dt(s):
+def str_to_dt(s: str)-> datetime.datetime:
     """Converts a string in format 2017-12-30T12:60:10Z to datetime"""
     return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
 
 
-def strs_to_dt(date_string, time_string):
+def strs_to_dt(date_string: str, time_string: str) -> datetime.datetime:
     """Converts two strings in formats "2017-12-30" and "12:60:20" to datetime"""
     return str_to_dt(date_string + "T" + time_string + "Z")
 
 
-def time_str_to_dt(s):
+def time_str_to_dt(s: str) -> datetime.datetime:
     """Converts a string in format 12:59:10 to datetime"""
     return datetime.datetime.strptime(s, '%H:%M:%S')
 
 
-def dt_to_str(dt):
+def dt_to_str(dt: datetime) -> Optional[str]:
     """Converts a datetime to a string in format 2017-12-30T12:60Z"""
     if dt is None:
         return None
     return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%M:%SZ')
 
 
-def dt_to_date_str(dt):
+def dt_to_date_str(dt: datetime) -> Optional[str]:
     """Converts a datetime to a string in format 2017-12-30"""
     if dt is None:
         return None
     return datetime.datetime.strftime(dt, '%Y-%m-%d')
 
 
-def dt_to_time_str(dt):
+def dt_to_time_str(dt: datetime) -> Optional[int]:
     """Converts a datetime to a string in format 12:59:10"""
     if dt is None:
         return None
     return datetime.datetime.strftime(dt, '%H:%M:%S')
 
 
-def add_versions(run_output):
+def add_versions(run_output: str):
     versions = json.loads(run_output)
     for lang in versions:
         language = model.Language.query.filter_by(name=lang).first()
         language.version = versions[lang]
         db_session.commit()
+

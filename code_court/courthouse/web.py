@@ -43,6 +43,7 @@ from views.defendant import defendant
 from views.auth import auth
 
 # turn down log level for werkzeug
+from flask.app import Flask
 logging.getLogger('werkzeug').setLevel(logging.INFO)
 
 log_location = 'logs/code_court.log'
@@ -52,7 +53,7 @@ app = Flask(__name__)
 CODE_COURT_PRODUCTION_ENV_VAR = "CODE_COURT_PRODUCTION"
 
 
-def create_app():
+def create_app() -> Flask:
     """
     Initializes the flask app object
 
@@ -167,7 +168,7 @@ def create_app():
     return app
 
 
-def setup_database(app):
+def setup_database(app: Flask) -> None:
     """Creates the database tables on initial startup"""
     with app.app_context():
         if not is_db_inited():
@@ -176,7 +177,7 @@ def setup_database(app):
                 dev_populate_db()
 
 
-def is_db_inited():
+def is_db_inited() -> bool:
     """Checks if the db is initialized
 
     Args:
@@ -190,7 +191,7 @@ def is_db_inited():
     return model.UserRole.query.count() > 0
 
 
-def populate_db():
+def populate_db() -> None:
     """Performs the initial database setup for the application
     """
     current_app.logger.info("Initializing db tables")
@@ -417,7 +418,7 @@ def populate_db():
     db_session.commit()
 
 
-def dev_populate_db():
+def dev_populate_db() -> None:
     """Performs the initial database setup for the application
     """
     current_app.logger.info("Initializing tables with dev data")
@@ -560,7 +561,7 @@ def dev_populate_db():
     db_session.commit()
 
 
-def setup_logging(app):
+def setup_logging(app: Flask) -> None:
     """Sets up the flask app loggers"""
     formatter = logging.Formatter(
         '%(asctime)s - %(filename)s - %(levelname)s - %(message)s')

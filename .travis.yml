@@ -1,6 +1,5 @@
 language: python
 python:
-  - "3.5"
   - "3.6"
 install:
   - pip install six
@@ -9,5 +8,7 @@ install:
 script:
   - cd code_court/courthouse/
   - nosetests
+  - pyre check
   - cd ../executor
   - nosetests
+
